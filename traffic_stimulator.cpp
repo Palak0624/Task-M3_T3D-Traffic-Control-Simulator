@@ -43,7 +43,7 @@ int compare_stats(const void *a, const void *b) {
 // Function to process data and find top congestions
 void process_data(TrafficRecord *records, int num_records, HourlyStats **results, int *num_results) {
     // Create a temporary array for hourly stats
-    HourlyStats *temp_stats = malloc(num_records * sizeof(HourlyStats));
+    HourlyStats *temp_stats = (HourlyStats *)malloc(num_records * sizeof(HourlyStats));
     int stats_count = 0;
     
     // Aggregate counts by hour and traffic light
@@ -74,7 +74,7 @@ void process_data(TrafficRecord *records, int num_records, HourlyStats **results
     qsort(temp_stats, stats_count, sizeof(HourlyStats), compare_stats);
     
     // Now select top N for each hour
-    *results = malloc(stats_count * sizeof(HourlyStats));
+    *results = (HourlyStats *)malloc(stats_count * sizeof(HourlyStats));
     *num_results = 0;
     
     if (stats_count == 0) return;
@@ -153,12 +153,12 @@ int main(int argc, char *argv[]) {
             int slave_results;
             MPI_Recv(&slave_results, 1, MPI_INT, src, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             
-            HourlyStats *slave_data = malloc(slave_results * sizeof(HourlyStats));
+            HourlyStats *slave_data = (HourlyStats *)malloc(slave_results * sizeof(HourlyStats));
             MPI_Recv(slave_data, slave_results * sizeof(HourlyStats), MPI_BYTE, 
                     src, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             
             // Merge with existing results
-            all_results = realloc(all_results, (total_results + slave_results) * sizeof(HourlyStats));
+            all_results = (HourlyStats *)realloc(all_results, (total_results + slave_results) * sizeof(HourlyStats));
             memcpy(&all_results[total_results], slave_data, slave_results * sizeof(HourlyStats));
             total_results += slave_results;
             
@@ -177,7 +177,7 @@ int main(int argc, char *argv[]) {
             char current_hour[20] = "";
             int count_in_hour = 0;
             
-            final_results = malloc(total_results * sizeof(HourlyStats));
+            final_results = (HourlyStats *)malloc(total_results * sizeof(HourlyStats));
             num_final_results = 0;
             
             for (int i = 0; i < total_results; i++) {
@@ -218,7 +218,7 @@ int main(int argc, char *argv[]) {
         int count;
         MPI_Recv(&count, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         
-        TrafficRecord *records = malloc(count * sizeof(TrafficRecord));
+        TrafficRecord *records = (TrafficRecord *)malloc(count * sizeof(TrafficRecord));
         MPI_Recv(records, count * sizeof(TrafficRecord), MPI_BYTE, 
                 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         
